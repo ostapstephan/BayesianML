@@ -19,12 +19,15 @@ def GenData(x, A0,A1, sigma):
     Target = A0+ x*A1 +np.random.normal(0, sigma)  
     return Target
 
-def likelyhood( x, t, w, beta):
-    # p = np.exp( 0.5*N*ln(beta)-0.5*N*ln(2*np.pi)-beta*e_d)
-    # W = meshgrid  
+def likelyhood(x, t, w, beta):
+    # this contains the Iota 
+    # it is basicallly a matrix of 1 and x so the 
+    # linear model can change the w's its given 
     iota = np.concatenate((np.ones((len(x),1)), x*np.ones((len(x),1))), axis = 1)
-    p = scipy.stats.normal(w.T*iota.pdf(t), beta**(-1))    
-    return p
+    print('w*iota',(200,200,2), w.shape,(1,2),iota.shape)
+    p = scipy.stats.norm(w@iota.T, beta**(-1))    
+    print('p.pdf(t).shape',p.pdf(t).shape)
+    return np.squeeze(p.pdf(t))
 
 if __name__ == '__main__':
     # Generate Data to model (linear model)
@@ -32,7 +35,6 @@ if __name__ == '__main__':
     a0,a1 = -0.3, 0.5
     sigma = .2 
     tn = GenData(x_data, a0, a1, sigma)
-     
     
     alpha = 2
     beta = (1/sigma)**2
@@ -58,6 +60,7 @@ if __name__ == '__main__':
     grid[:, :, 1] = y 
     rv = scipy.stats.multivariate_normal([0,0],(alpha**(-1))*np.eye(2)) 
     z = rv.pdf(grid)
+    print(z.shape)
     plt.contourf(x, y, z, levels=50, cmap = 'jet')
 
     plt.xlabel('W0', fontsize=10)
@@ -90,21 +93,15 @@ if __name__ == '__main__':
      
     w0, w1 = np.mgrid[-1:1:.01, -1:1:.01]
     grid = np.empty(w0.shape + (2,)) 
-
-    x_data[0] 
-    t[0]
-    plt.contourf(w0, w1, likelyhood( x[0], t[0], grid, sigma**-1), levels=50, cmap = 'jet')
+    
+    # print(likelyhood( [x_data[0]], [tn[0]], grid, sigma**-1).shape) 
+    plt.contourf(w0, w1, likelyhood( [x_data[0]], [tn[0]], grid, sigma**-1), levels=50, cmap = 'jet')
      
     plt.xlabel('W0', fontsize=10)
     plt.ylabel('W1',labelpad=30, fontsize=10, rotation=0)
     plt.title('Prior/Posterior')
     plt.axis('square')
-
-
     
-
-
-     
     plt.tight_layout()
     plt.savefig('project_2_graphs/3_7.pdf')
 
