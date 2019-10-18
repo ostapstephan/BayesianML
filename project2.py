@@ -3,11 +3,13 @@
 # Prof. Keene
 # Project 2
 
+
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.misc
 import scipy.special
 import scipy.stats  
+
 '''
 Reproduce figures 3.7 and 3.8 in the textbook.
 The exact data they used is described in the text. 
@@ -24,10 +26,21 @@ def likelyhood(x, t, w, beta):
     # it is basicallly a matrix of 1 and x so the 
     # linear model can change the w's its given 
     iota = np.concatenate((np.ones((len(x),1)), x*np.ones((len(x),1))), axis = 1)
-    print('w*iota',(200,200,2), w.shape,(1,2),iota.shape)
     p = scipy.stats.norm(w@iota.T, beta**(-1))    
-    print('p.pdf(t).shape',p.pdf(t).shape)
     return np.squeeze(p.pdf(t))
+
+def posterior(w,x,t,alpha,beta):
+
+    iota = np.concatenate( (np.ones((len(x),1)), x*np.ones((len(x),1))), axis = 1)
+
+    #note this sn is actually sn**-1
+    print(x.shape[0])
+    sn = alpha*np.eye(x.shape[0]) + beta*iota.T*iota
+    
+    mn = beta*(sn**(-1))@iota.T@t
+    posterior = scipy.stats.multivariate_normal(mn,sn) 
+    return posterior.pdf(w)
+
 
 if __name__ == '__main__':
     # Generate Data to model (linear model)
@@ -55,6 +68,7 @@ if __name__ == '__main__':
     # generate the meshgrid to plot contour of the prior
     x, y = np.mgrid[-1:1:.001, -1:1:.001]
     grid = np.empty(x.shape + (2,)) 
+    print('empty grid',grid.shape)
     
     grid[:, :, 0] = x
     grid[:, :, 1] = y 
@@ -94,6 +108,9 @@ if __name__ == '__main__':
     w0, w1 = np.mgrid[-1:1:.01, -1:1:.01]
     grid = np.empty(w0.shape + (2,)) 
     
+    grid[:, :, 0] = w0
+    grid[:, :, 1] = w1
+
     # print(likelyhood( [x_data[0]], [tn[0]], grid, sigma**-1).shape) 
     plt.contourf(w0, w1, likelyhood( [x_data[0]], [tn[0]], grid, sigma**-1), levels=50, cmap = 'jet')
      
@@ -102,7 +119,27 @@ if __name__ == '__main__':
     plt.title('Prior/Posterior')
     plt.axis('square')
     
+    loc = 5
+    plt.subplot(4,3,loc) 
+    
+    w0, w1 = np.mgrid[-1:1:.01, -1:1:.01]
+    grid = np.empty(w0.shape + (2,)) 
+    grid[:, :, 0] = w0
+    grid[:, :, 1] = w1
+
+    plt.contourf(w0, w1, posterior(grid, x_data[0], tn[0],alpha, sigma**-1), levels=50, cmap = 'jet')
+     
+    plt.xlabel('W0', fontsize=10)
+    plt.ylabel('W1',labelpad=30, fontsize=10, rotation=0)
+    plt.title('Prior/Posterior')
+    plt.axis('square')
+    
+
+
+
+
     plt.tight_layout()
+
     plt.savefig('project_2_graphs/3_7.pdf')
 
 
