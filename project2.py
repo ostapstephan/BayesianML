@@ -36,7 +36,21 @@ def posterior(w,x,t,alpha,beta):
     posterior = scipy.stats.multivariate_normal(np.squeeze(mn), sn) 
     return posterior.pdf(w), posterior
 
-if __name__ == '__main__':
+def likelyhood(x, t, w, beta):
+    iota = np.concatenate((np.ones((len(x),1)), x*np.ones((len(x),1))), axis = 1)
+    p = scipy.stats.norm(w@iota.T, beta**(-1))    
+    return np.squeeze(p.pdf(t))
+
+def posterior(w,x,t,alpha,beta):
+    # iota = np.expand_dims(np.concatenate((np.ones(x.shape[0]), x),axis=1 ),0)
+    iota = np.column_stack((np.ones(x.shape[0]), x))
+
+    sn = np.linalg.inv(alpha*np.eye(iota.shape[1]) + beta*iota.T@iota)
+    mn = (beta* (sn@iota.T)@t)
+    posterior = scipy.stats.multivariate_normal(np.squeeze(mn), sn) 
+    return posterior.pdf(w), posterior
+
+def make37():
     # Generate Data to model (linear model)
     x_data  = np.random.uniform(-1,1,(20))
     a0,a1 = -0.3, 0.5
@@ -259,6 +273,91 @@ if __name__ == '__main__':
     plt.savefig('project_2_graphs/3_7.pdf')
 
 
+def make38():
+    def format(plt,x=np.array([]),t=np.array([]),color = 'g',title = ''):
+        if (x != np.array([])) and (t != np.array([])):
+            plt.plot(x,t,color=color)
+
+        plt.ylim(bottom=-1.5,top= 1.5) 
+        plt.xlim(left =0,right=1)
+        plt.xlabel('X', fontsize=10)
+        plt.ylabel('t',labelpad=10, fontsize=10, rotation=0)
+        plt.title(title)
+
+    def variance(x,t,alpha,beta):
+        # iota = np.expand_dims(np.concatenate((np.ones(x.shape[0]), x),axis=1 ),0)
+        g = scipy.stats.norm()
+        iota = np.column_stack( g.pdf(x),g.pdf(x),g.pdf(x), g.pdf(x),g.pdf(x),g.pdf(x), g.pdf(x),g.pdf(x),g.pdf(x))
+
+        variance = 1/beta+ iota.T
+
+        sn = np.linalg.inv(alpha*np.eye(iota.shape[1]) + beta*iota.T@iota)
+        
+        mn = (beta* (sn@iota.T)@t)
+        posterior = scipy.stats.multivariate_normal(np.squeeze(mn), sn) 
+        return posterior.pdf(w), posterior
+
+
+        
+
+
+
+def likelyhood(x, t, w, beta):
+    iota = np.concatenate((np.ones((len(x),1)), x*np.ones((len(x),1))), axis = 1)
+    p = scipy.stats.norm(w@iota.T, beta**(-1))    
+    return np.squeeze(p.pdf(t))
+
+def posterior(w,x,t,alpha,beta):
+    # iota = np.expand_dims(np.concatenate((np.ones(x.shape[0]), x),axis=1 ),0)
+    iota = np.column_stack((np.ones(x.shape[0]), x))
+
+    sn = np.linalg.inv(alpha*np.eye(iota.shape[1]) + beta*iota.T@iota)
+    mn = (beta* (sn@iota.T)@t)
+    posterior = scipy.stats.multivariate_normal(np.squeeze(mn), sn) 
+    return posterior.pdf(w), posterior
+
+
+
+    loc = 1
+    plt.subplot(2,2,loc) 
+    x_ = np.linspace(0,1,num=100)
+    t_ = np.sin(2*np.pi*x_)
+    
+    format(plt,x_,t_,title ='N=1')
+        
+    loc = 2
+    plt.subplot(2,2,loc) 
+    x_ = np.linspace(0,1,num=100)
+    t_ = np.sin(2*np.pi*x_)
+    format(plt,x_,t_,title ='N=2')
+
+    loc = 3
+    plt.subplot(2,2,loc) 
+    x_ = np.linspace(0,1,num=100)
+    t_ = np.sin(2*np.pi*x_)
+    format(plt,x_,t_,title ='N=4')
+
+    loc = 4
+    plt.subplot(2,2,loc) 
+    x_ = np.linspace(0,1,num=100)
+    t_ = np.sin(2*np.pi*x_)
+    format(plt,x_,t_,title ='N=25' )
+   
+
+    
+    
+    plt.tight_layout()
+    plt.savefig('project_2_graphs/3_8.pdf')
+
+ 
+
+
+
+
+if __name__ == '__main__':
+    # make37()
+
+    make38()
 
 
 '''
