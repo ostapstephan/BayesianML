@@ -276,7 +276,7 @@ def make37():
 def make38():
     def format(plt,x=np.array([]),t=np.array([]),color = 'g',title = ''):
         if (x != np.array([])) and (t != np.array([])):
-            plt.plot(x,t,color=color)
+            plt.plot(x,t,color=color,linewidth=1)
 
         plt.ylim(bottom=-1.5,top= 1.5) 
         plt.xlim(left =0,right=1)
@@ -284,80 +284,47 @@ def make38():
         plt.ylabel('t',labelpad=10, fontsize=10, rotation=0)
         plt.title(title)
 
-    def variance(x,t,alpha,beta):
-        # iota = np.expand_dims(np.concatenate((np.ones(x.shape[0]), x),axis=1 ),0)
-        g = scipy.stats.norm()
-        iota = np.column_stack( g.pdf(x),g.pdf(x),g.pdf(x), g.pdf(x),g.pdf(x),g.pdf(x), g.pdf(x),g.pdf(x),g.pdf(x))
-
-        variance = 1/beta+ iota.T
+    def gen_M_S( x, t, alpha, beta):
+        iota = np.column_stack( [scipy.stats.norm(i*.1+.1,.2).pdf(x) for i in range(9)] )
 
         sn = np.linalg.inv(alpha*np.eye(iota.shape[1]) + beta*iota.T@iota)
-        
         mn = (beta* (sn@iota.T)@t)
-        posterior = scipy.stats.multivariate_normal(np.squeeze(mn), sn) 
-        return posterior.pdf(w), posterior
+ 
+        return mn, sn    
+            
 
-
-        
-
-
-
-def likelyhood(x, t, w, beta):
-    iota = np.concatenate((np.ones((len(x),1)), x*np.ones((len(x),1))), axis = 1)
-    p = scipy.stats.norm(w@iota.T, beta**(-1))    
-    return np.squeeze(p.pdf(t))
-
-def posterior(w,x,t,alpha,beta):
-    # iota = np.expand_dims(np.concatenate((np.ones(x.shape[0]), x),axis=1 ),0)
-    iota = np.column_stack((np.ones(x.shape[0]), x))
-
-    sn = np.linalg.inv(alpha*np.eye(iota.shape[1]) + beta*iota.T@iota)
-    mn = (beta* (sn@iota.T)@t)
-    posterior = scipy.stats.multivariate_normal(np.squeeze(mn), sn) 
-    return posterior.pdf(w), posterior
-
-
-
+    
+    sigma = .2 
+    alpha = 2
+    beta = (1/sigma)**2
+    
     loc = 1
-    plt.subplot(2,2,loc) 
-    x_ = np.linspace(0,1,num=100)
-    t_ = np.sin(2*np.pi*x_)
-    
-    format(plt,x_,t_,title ='N=1')
+    name = ['N=1','N=2','N=4','N=25']
+    for N in [1,2,4,25]: 
+        plt.subplot(2,2,loc) 
+        x_ = np.linspace(0,1,num=100)
+        t_ = np.sin(2*np.pi*x_)
+         
+        r = np.random.randint(0, 99, (N) )
+        mn,sn = gen_M_S(x_[r], t_[r], alpha, beta)
+        phi = np.column_stack([scipy.stats.norm(i*.1+.1,.2).pdf(x_) for i in range(9)]).T
+        g_mean = mn.T@phi
+        plt.plot(x_, g_mean,linewidth=1)
+        plt.plot(x_[r], t_[r],'o', markersize=3)
+        var =np.diag( 1/beta + phi.T@sn@phi)
+        plt.fill_between(x_,g_mean+var,g_mean-var,color = 'pink')
+        format(plt,x_,t_,title = name[loc-1])
+        loc+=1
         
-    loc = 2
-    plt.subplot(2,2,loc) 
-    x_ = np.linspace(0,1,num=100)
-    t_ = np.sin(2*np.pi*x_)
-    format(plt,x_,t_,title ='N=2')
-
-    loc = 3
-    plt.subplot(2,2,loc) 
-    x_ = np.linspace(0,1,num=100)
-    t_ = np.sin(2*np.pi*x_)
-    format(plt,x_,t_,title ='N=4')
-
-    loc = 4
-    plt.subplot(2,2,loc) 
-    x_ = np.linspace(0,1,num=100)
-    t_ = np.sin(2*np.pi*x_)
-    format(plt,x_,t_,title ='N=25' )
-   
-
-    
-    
+  
     plt.tight_layout()
     plt.savefig('project_2_graphs/3_8.pdf')
-
- 
-
-
 
 
 if __name__ == '__main__':
     # make37()
-
     make38()
+
 
 
 '''
