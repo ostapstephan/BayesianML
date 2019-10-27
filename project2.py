@@ -3,18 +3,11 @@
 # Prof. Keene
 # Project 2
 
-
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.misc
 import scipy.special
 import scipy.stats  
-
-'''
-Reproduce figures 3.7 and 3.8 in the textbook.
-The exact data they used is described in the text. 
-Note your figure will look slightly different because they rely on random draws from the dataset.
-'''
 
 def GenData(x, A0,A1, sigma):
     # gen data along the line A0 + x*A1 and add mean 0 std sigma noise on top
@@ -22,21 +15,8 @@ def GenData(x, A0,A1, sigma):
     Target = A0 + x*(A1) + rand_noise 
     return Target
 
-def likelyhood(x, t, w, beta):
-    iota = np.concatenate((np.ones((len(x),1)), x*np.ones((len(x),1))), axis = 1)
-    p = scipy.stats.norm(w@iota.T, beta**(-1))    
-    return np.squeeze(p.pdf(t))
-
-def posterior(w,x,t,alpha,beta):
-    # iota = np.expand_dims(np.concatenate((np.ones(x.shape[0]), x),axis=1 ),0)
-    iota = np.column_stack((np.ones(x.shape[0]), x))
-
-    sn = np.linalg.inv(alpha*np.eye(iota.shape[1]) + beta*iota.T@iota)
-    mn = (beta* (sn@iota.T)@t)
-    posterior = scipy.stats.multivariate_normal(np.squeeze(mn), sn) 
-    return posterior.pdf(w), posterior
-
-def likelyhood(x, t, w, beta):
+def likelihood(x, t, w, beta):
+    # calculate the likelihood
     iota = np.concatenate((np.ones((len(x),1)), x*np.ones((len(x),1))), axis = 1)
     p = scipy.stats.norm(w@iota.T, beta**(-1))    
     return np.squeeze(p.pdf(t))
@@ -78,6 +58,7 @@ def make37():
     grid = np.empty(x.shape + (2,)) 
     print('empty grid',grid.shape)
     
+    # plot prior 
     grid[:, :, 0] = x
     grid[:, :, 1] = y 
     rv = scipy.stats.multivariate_normal([0,0],(alpha**(-1))*np.eye(2)) 
@@ -90,7 +71,7 @@ def make37():
     plt.title('Prior/Posterior')
     plt.axis('square')
     
-    # Plot the dataspace 
+    # Plot the dataspace of the prior
     # (sample the weights plot the equations)
     loc = 3
     plt.subplot(4,3,loc) 
@@ -120,7 +101,7 @@ def make37():
     grid[:, :, 0] = w0
     grid[:, :, 1] = w1
 
-    plt.contourf(w0, w1, likelyhood( [x_data[0]], [tn[0]], grid, sigma**-1), levels=50, cmap = 'jet')
+    plt.contourf(w0, w1, likelihood( [x_data[0]], [tn[0]], grid, sigma**-1), levels=50, cmap = 'jet')
     plt.plot(a0,a1,'+')
      
     plt.xlabel('W0', fontsize=10)
@@ -174,7 +155,7 @@ def make37():
     grid[:, :, 0] = w0
     grid[:, :, 1] = w1
 
-    plt.contourf(w0, w1, likelyhood( [x_data[1]], [tn[2]], grid, sigma**-1), levels=50, cmap = 'jet')
+    plt.contourf(w0, w1, likelihood( [x_data[1]], [tn[2]], grid, sigma**-1), levels=50, cmap = 'jet')
     plt.plot(a0,a1,'+')
      
     plt.xlabel('W0', fontsize=10)
@@ -226,7 +207,7 @@ def make37():
     grid[:, :, 0] = w0
     grid[:, :, 1] = w1
 
-    plt.contourf(w0, w1, likelyhood( [x_data[-1]], [tn[-1]], grid, sigma**-1), levels=50, cmap = 'jet')
+    plt.contourf(w0, w1, likelihood( [x_data[-1]], [tn[-1]], grid, sigma**-1), levels=50, cmap = 'jet')
     plt.plot(a0,a1,'+')
      
     plt.xlabel('W0', fontsize=10)
@@ -294,6 +275,8 @@ def make38():
             
 
     
+    plt.rcParams['figure.figsize'] = (16,9) 
+
     sigma = .2 
     alpha = 2
     beta = (1/sigma)**2
@@ -322,8 +305,13 @@ def make38():
 
 
 if __name__ == '__main__':
-    # make37()
-    make38()
+    print("Make which plot? 1 or 2 ")
+    inp = input()
+    if inp== '1':
+        make37()
+
+    if inp== '2':
+        make38()
 
 
 
