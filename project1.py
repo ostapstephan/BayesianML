@@ -8,6 +8,9 @@ import matplotlib.pyplot as plt
 import scipy.misc
 import scipy.special
 
+from scipy.stats import norm 
+
+
 # Simulation 1 you should generate Bernoulli random variables and estimate the probability p. 
 def ML_Estimate(x):
     # ML estimate eq. 2.7
@@ -100,30 +103,59 @@ def bernoulli():
     plt.tight_layout()
     plt.savefig(f'p1.pdf')
 
-
-
-
 ##### Gaussian Stuff ##### 
-
 def gauss_ml_est(d):
     return np.mean(d)
 
-    
-def gaussianBayes(sig,sig_0, mu_ml, mu_0, N, ):
+def gaussianBayes(mu_ml, sig, mu_0, sig_0, N):
     Mu_n = (sig**2/(N*sig_0**2+sig**2))*mu_0 + ((N*sig**2)/(N*sig_0**2+sig**2))*mu_ml
-    # 1/sig_n**2 = 1/sig_0**2 + N/sig**2
-    return  Mu_n#, 1/sig_n
+    sig_n = (1/sig_0**2 + N/sig**2)**-1
+    return  Mu_n, sig_n
 
-# data = np.random.normal(4,1,size=(100))
+def gaussian_plots():
+    data = np.random.normal(4,1,size=(100))
+    
+    mu = 3 
+    sigma = .5
+    data = np.random.normal(mu,sigma,(100) )
+
+    ml_Est = np.mean(data)
+    print(ml_Est)
+    
+    mu_space = np.linspace (0,10,1001)
+
+    -=norm(mu,scale)
+        
+
+    f, ((ax1, ax2),(ax3, ax4)) = plt.subplots(2, 2, sharex='col', sharey='row')
+    ax1.plot(x, y)
+    ax1.set_title('Sharing x per column, y per row')
+    ax2.scatter(x, y)
+    ax3.scatter(x, 2*y ** 2 - 1, color='r')
+    ax4.plot(x, 2 * y ** 2 - 1, color='r')
 
 
-# f, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, sharex='col', sharey='row')
-# ax1.plot(x, y)
-# ax1.set_title('Sharing x per column, y per row')
-# ax2.scatter(x, y)
-# ax3.scatter(x, 2 * y ** 2 - 1, color='r')
-# ax4.plot(x, 2 * y ** 2 - 1, color='r')
 
+    plt.rcParams['figure.figsize'] = (20,12)
+    mu = np.linspace(0,1,num=1000)
+     = 7
+    b = 3
+    loc = 221
+    for i in range(N+1):
+        if i==0 or i==10 or i==66 or i==100: 
+            m = data[:i].sum()
+            l = i-m
+            density = betaConjPriorUpdate(mu,m,l,a,b)
+            plt.subplot(loc) 
+            plt.plot(mu,density) 
+            plt.xlabel('Mu', fontsize=10)
+            ylab = plt.ylabel('P(mu|m,l,a,b)',labelpad=30, fontsize=10)
+            ylab.set_rotation(0) 
+            plt.title(f'Peak at mu = {round(mu[np.argwhere(density==max(density))][0][0],3)}')
+            loc+=1
+
+    plt.tight_layout()
+    plt.savefig(f'p1.pdf')
 
 
 
