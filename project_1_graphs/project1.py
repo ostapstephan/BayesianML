@@ -44,12 +44,12 @@ def bernoulli():
 
     # bad Guess
     plt.rcParams['figure.figsize'] = (20,12)
-
     a = 3
     b = 14
 
     ag = 3
     bg = 4
+
     mse_bad = []
     mse_good = []
     MLE = ML_Estimate(data[:])
@@ -69,11 +69,10 @@ def bernoulli():
     ylab.set_rotation(0) 
            
     plt.title(f'Mean Squared Error Bernoulli')
-
-
     plt.tight_layout()
     plt.savefig(f'MSE_Bernoulli.pdf')
     plt.clf()
+
 
     f, ((ax1, ax2),(ax3, ax4)) = plt.subplots(2, 2, sharex='col', sharey='row') 
 
@@ -101,6 +100,8 @@ def bernoulli():
 
     plt.savefig(f'PDF_Bernoulli.pdf')
 
+    plt.clf()
+
 
 ##### Gaussian Stuff ##### 
 def gauss_ml_est(d):
@@ -113,18 +114,52 @@ def gaussianBayes(mu_ml, sig, mu_0, sig_0, N):
     return  Mu_n, sig_n
 
 def gaussian_plots():
-    data = np.random.normal(4,1,size=(100))
-    
+    N=100
+
     mu = 3 
     sigma = .5
 
     mu_0  = 5
     sig_0 = 1
 
+    mu_0_b  = 7
+    sig_0_b = .9
+
+
     mu_space = np.linspace (0,10,1001)
-    data = np.random.normal(mu,sigma,(100) )
+    data = np.random.normal(mu,sigma,(N) )
 
     plt.rcParams['figure.figsize'] = (20,12)
+
+    mse_bad = []
+    mse_good = []
+
+        
+    for i in range(N):
+        mu_ml = gauss_ml_est(data[:i])
+        ml_Est = np.mean(data[:i])
+        Mu_n,  _ = gaussianBayes(ml_Est, sigma, mu_0, sig_0, i)
+        Mu_nb, _ = gaussianBayes(ml_Est, sigma, mu_0_b, sig_0_b, i)
+
+        mse_bad.append (mse(Mu_n, mu_ml ))
+        mse_good.append(mse(Mu_nb, mu_ml))
+
+
+    numSamples = np.linspace(1,N,N)
+    plt.plot(numSamples,mse_bad)
+    plt.plot(numSamples,mse_good)
+
+    plt.xlabel('Num Observations', fontsize=10)
+    ylab = plt.ylabel('MSE',labelpad=30, fontsize=10)
+    ylab.set_rotation(0) 
+           
+    plt.title(f'Mean Squared Error Gaussian')
+
+    plt.tight_layout()
+    plt.savefig(f'MSE_Gaussian.pdf')
+ 
+    plt.clf()
+
 
     f, ((ax1, ax2),(ax3, ax4)) = plt.subplots(2, 2, sharex='col', sharey='row') 
     
@@ -151,10 +186,7 @@ def gaussian_plots():
     plt.tight_layout()
 
     f.subplots_adjust(top=0.92, wspace = 0.2, hspace = 0.2 )
-    # plt.savefig(f'p1.pdf')
-    plt.show()
-
-
+    plt.savefig(f'PDF_Gaussian.pdf')
 
 
 if __name__ == '__main__':
