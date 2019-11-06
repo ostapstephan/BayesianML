@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt 
 import numpy as np
 import scipy.io
-from sklearn.metrics import roc_curve
+from sklearn import metrics
 from sklearn.model_selection import train_test_split
 
 '''
@@ -26,7 +26,6 @@ def plot(x=np.empty([2]), t=np.empty([2]) ):
         t = data['circles'][0][0][1].squeeze() # 400,1 => 400
     else:
         x, y = x[:,:2].T
-
 
     plt.scatter(x[t==0],y[t==0])
     plt.scatter(x[t==1],y[t==1])
@@ -58,26 +57,65 @@ def trainAndInfer(x_train, x_test, t_train):
 
 
 
+def ROC():
+    fpr = dict()
+    tpr = dict()
+    roc_auc = dict()
+    for i in range(2):
+        fpr[i], tpr[i], _ = roc_curve(y_test[:, i], y_score[:, i])
+        roc_auc[i] = auc(fpr[i], tpr[i])
+
+    # Compute micro-average ROC curve and ROC area
+    fpr["micro"], tpr["micro"], _ = roc_curve(y_test.ravel(), y_score.ravel())
+    roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
+
+    # Plot of a ROC curve for a specific class
+    plt.figure()
+    lw = 2
+    plt.plot(fpr[2], tpr[2], color='darkorange', lw=lw, label='ROC curve (area = %0.2f)' % roc_auc[2])
+    plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Receiver operating characteristic example')
+    plt.legend(loc="lower right")
+    plt.show()
+
+def plotROC(x_test, t_hat):
+    fpr, tpr, thresholds = metrics.roc_curve(t_test,t_hat)
+    roc_auc = metrics.auc(fpr, tpr)
+
+    plt.clf()
+    plt.title('Circles Receiver Operating Curve')
+    plt.plot(fpr, tpr, 'b', label = 'AUC = %0.2f' % roc_auc, linewidth=10)
+    plt.legend(loc = 'lower right')
+    plt.xlim([0, 1])
+    plt.ylim([0, 1])
+    plt.ylabel('True Positive Rate')
+    plt.xlabel('False Positive Rate')
+    plt.show()
+
+
 
 if __name__ == '__main__':
 
     data = scipy.io.loadmat("mlData.mat")
 
-    # plot()
-    # x, y = data['circles'][0][0][0].T
     x = data['circles'][0][0][0]
     t = data['circles'][0][0][1].squeeze() # 400,1 => 400
     
     x_train, x_test, t_train, t_test = train_test_split(x, t, test_size=0.33, random_state=42)
     t_hat = trainAndInfer(x_train, x_test, t_train )
 
-    plot(x_test, t_hat)
+    plot(x_test, t_hat)    
  
     x = np.concatenate((x,np.expand_dims(x[:,0]**2+x[:,1]**2,1)),axis =1 )
     x_train, x_test, t_train, t_test = train_test_split(x, t, test_size=0.33, random_state=42)
     t_hat = trainAndInfer(x_train, x_test, t_train )
 
-    plot(x_test, t_hat)
+    plot(x_test, t_hat)    
+    plotROC(x_test, t_hat)    
 
 
     
