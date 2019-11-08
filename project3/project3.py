@@ -19,7 +19,7 @@ Plot a ROC curve for both of your classifiers, Plot the decision boundary for bo
 
 '''
 
-def plot(x=np.empty([2]), t=np.empty([2]) ):
+def plot(x=np.empty([2]), t=np.empty([2]), title=''):
     if t == np.empty([2]):
         data = scipy.io.loadmat("mlData.mat")
         x, y = data['circles'][0][0][0].T
@@ -29,9 +29,14 @@ def plot(x=np.empty([2]), t=np.empty([2]) ):
 
     plt.scatter(x[t==0],y[t==0])
     plt.scatter(x[t==1],y[t==1])
+    
+    plt.title(title)
+    plt.axis('square')
+    plt.xlabel('X', fontsize=10)
+    plt.ylabel('Y',labelpad=30, fontsize=10, rotation=0)
     plt.show()
 
-def trainAndInfer(x_train, x_test, t_train):
+def trainAndInferGGM(x_train, t_train, x_test):
     N = len(t_train) 
     N1 = sum(t_train) 
     N2 = sum(1-t_train) 
@@ -55,39 +60,20 @@ def trainAndInfer(x_train, x_test, t_train):
 
     return pred
 
+def trainAndInferIRLS(x_train, t_train, x_test, n_iter):
+    # phi.shape = [n,m]
+    phi =  x_train
+    yhat = 
 
 
-def ROC():
-    fpr = dict()
-    tpr = dict()
-    roc_auc = dict()
-    for i in range(2):
-        fpr[i], tpr[i], _ = roc_curve(y_test[:, i], y_score[:, i])
-        roc_auc[i] = auc(fpr[i], tpr[i])
 
-    # Compute micro-average ROC curve and ROC area
-    fpr["micro"], tpr["micro"], _ = roc_curve(y_test.ravel(), y_score.ravel())
-    roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
-
-    # Plot of a ROC curve for a specific class
-    plt.figure()
-    lw = 2
-    plt.plot(fpr[2], tpr[2], color='darkorange', lw=lw, label='ROC curve (area = %0.2f)' % roc_auc[2])
-    plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
-    plt.xlim([0.0, 1.0])
-    plt.ylim([0.0, 1.05])
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.title('Receiver operating characteristic example')
-    plt.legend(loc="lower right")
-    plt.show()
-
-def plotROC(x_test, t_hat):
+    
+def plotROC(x_test, t_hat,title= ''):
     fpr, tpr, thresholds = metrics.roc_curve(t_test,t_hat)
     roc_auc = metrics.auc(fpr, tpr)
 
     plt.clf()
-    plt.title('Circles Receiver Operating Curve')
+    plt.title( title +' Receiver Operating Curve')
     plt.plot(fpr, tpr, 'b', label = 'AUC = %0.2f' % roc_auc, linewidth=10)
     plt.legend(loc = 'lower right')
     plt.xlim([0, 1])
@@ -102,24 +88,61 @@ if __name__ == '__main__':
 
     data = scipy.io.loadmat("mlData.mat")
 
-    x = data['circles'][0][0][0]
-    t = data['circles'][0][0][1].squeeze() # 400,1 => 400
+    # Load the data for the unimodal 
+    x = data['unimodal'][0][0][0]
+    t = data['unimodal'][0][0][1].squeeze() 
     
+    # Train the gaussian generative model for the unimodal 
     x_train, x_test, t_train, t_test = train_test_split(x, t, test_size=0.33, random_state=42)
-    t_hat = trainAndInfer(x_train, x_test, t_train )
+    t_hat = trainAndInferGGM(x_train, t_train, x_test )
 
-    plot(x_test, t_hat)    
- 
+    # Plot the results for the unimodal data
+    plot(x_test, t_hat, 'Unimodal Data')    
+    plotROC(x_test, t_hat, 'Unimodal Data')    
+    
+    # Load the data for the circles
+    x = data['circles'][0][0][0]
+    t = data['circles'][0][0][1].squeeze() 
+    
+    # Train the gaussian generative model for the circles w/o third feat
+    x_train, x_test, t_train, t_test = train_test_split(x, t, test_size=0.33, random_state=42)
+    t_hat = trainAndInferGGM(x_train, t_train, x_test )
+
+    # Plot the results for the circles w/0 third feat
+    plot(x_test, t_hat,'Circles Data Without a Third Feature')
+    plotROC(x_test, t_hat, 'Circles Data Without a Third Feature')
+
+    # Train the gaussian generative model for the circles with third feat
     x = np.concatenate((x,np.expand_dims(x[:,0]**2+x[:,1]**2,1)),axis =1 )
     x_train, x_test, t_train, t_test = train_test_split(x, t, test_size=0.33, random_state=42)
-    t_hat = trainAndInfer(x_train, x_test, t_train )
+    t_hat = trainAndInferGGM(x_train, t_train, x_test)
 
-    plot(x_test, t_hat)    
-    plotROC(x_test, t_hat)    
-
-
+    # Plot the results for the circles with the third feat
+    plot(x_test, t_hat, 'Circles Data With a Third Feature' )
+    plotROC(x_test, t_hat, 'Circles Data With a Third Feature')    
     
-    
+
+    # Load the clean data for the unimodal dataset 
+    x = data['circles'][0][0][0]
+    t = data['circles'][0][0][1].squeeze() 
+ 
+    # Train the logistic regression model for the circles
+    x_train, x_test, t_train, t_test = train_test_split(x, t, test_size=0.33, random_state=42)
+    t_hat = trainAndInferIRLS(x_train, x_test, t_train )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
