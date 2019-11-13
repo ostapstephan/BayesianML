@@ -46,7 +46,7 @@ def plot(x=np.empty([2]), t=np.empty([2]), title='', m = None, b = None):
     plt.axis('square')
     plt.xlabel('X', fontsize=10)
     plt.ylabel('Y',labelpad=30, fontsize=10, rotation=0)
-    # plt.show()
+    plt.show()
     print(str(title).replace('\n','_').replace(' ','_'))
     plt.matplotlib.pyplot.savefig('plots/'+str(title).replace('\n','_').replace(' ','_')+'.pdf',)
     plt.clf()
@@ -134,7 +134,7 @@ def plotROC(x_test, t_hat, title= ''):
     plt.ylim([0, 1])
     plt.ylabel('True Positive Rate')
     plt.xlabel('False Positive Rate')
-    # plt.show()
+    plt.show()
     plt.matplotlib.pyplot.savefig('plots/'+str(title).replace('\n','_').replace(' ','_')+'.pdf',)
     plt.clf()
 
