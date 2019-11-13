@@ -1,8 +1,16 @@
+# python 3
+# Ostap Voynarovskiy And Carena Toy
+# Prof. Keene
+# Project 3
+
 import matplotlib.pyplot as plt 
 import numpy as np
 import scipy.io
 from sklearn import metrics
 from sklearn.model_selection import train_test_split
+
+from scipy.io import arff 
+import pandas as pd 
 
 '''
 Implement two different linear classifiers:
@@ -38,7 +46,10 @@ def plot(x=np.empty([2]), t=np.empty([2]), title='', m = None, b = None):
     plt.axis('square')
     plt.xlabel('X', fontsize=10)
     plt.ylabel('Y',labelpad=30, fontsize=10, rotation=0)
-    plt.show()
+    # plt.show()
+    print(str(title).replace('\n','_').replace(' ','_'))
+    plt.matplotlib.pyplot.savefig('plots/'+str(title).replace('\n','_').replace(' ','_')+'.pdf',)
+    plt.clf()
 
 def trainAndInferGGM(x_train, t_train, x_test):
 
@@ -123,7 +134,9 @@ def plotROC(x_test, t_hat, title= ''):
     plt.ylim([0, 1])
     plt.ylabel('True Positive Rate')
     plt.xlabel('False Positive Rate')
-    plt.show()
+    # plt.show()
+    plt.matplotlib.pyplot.savefig('plots/'+str(title).replace('\n','_').replace(' ','_')+'.pdf',)
+    plt.clf()
 
 def accuracy(t_hat, t_test ):
     return  (len(t_hat)- sum(abs(t_hat-t_test))  )/len(t_hat) *100
@@ -171,7 +184,6 @@ if __name__ == '__main__':
     # Train the logistic regression model for the circles
     x_train, x_test, t_train, t_test = train_test_split(x, t, test_size=0.33, random_state=42)
     t_hat, w = trainAndInferIRLS(x_train, t_train, x_test, False ,10 )
-    print(w)
 
     # Plot the results for the circles with the third feat
     plot(x_test, t_hat, f'Unimodal Data IRLS\n Accuracy: {accuracy(t_hat, t_test)}%' )
@@ -188,4 +200,41 @@ if __name__ == '__main__':
     # Plot the results for the circles with the third feat
     plot(x_test, t_hat, f'Circles Data IRLS\n Accuracy: {accuracy(t_hat, t_test)}%' )
     plotROC(x_test, t_hat, 'Circles Data IRLS')    
-   
+    
+
+    ##########################################################
+    ##          banknote authentication dataset            ### 
+    ##########################################################
+
+    df = pd.read_csv('banknote_authentication.txt')         
+
+    x = np.asarray(df[['a','b','c','d']])
+    t = np.asarray(df['target'])
+
+    x_train, x_test, t_train, t_test = train_test_split(x, t, test_size=0.2, random_state=42)
+    t_hat, _ = trainAndInferIRLS(x_train, t_train, x_test, True, 10)
+
+    plotROC(x_test, t_hat, f'Banknote Authentication Dataset Accuracy: {accuracy(t_hat, t_test)}%')
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
