@@ -8,8 +8,11 @@ import numpy as np
 import scipy.io
 from sklearn import metrics
 from sklearn.model_selection import train_test_split
+from sklearn.svm import svc  
 from scipy.io import arff 
+
 import pandas as pd 
+
 
 
 '''
@@ -138,6 +141,78 @@ def plotROC(x_test, t_hat, title= ''):
 
 def accuracy(t_hat, t_test ):
     return  (len(t_hat)- sum(abs(t_hat-t_test))  )/len(t_hat) *100
+
+def GaussianProc():
+    def format(plt,x=np.array([]),t=np.array([]),color = 'g',title = ''):
+        if (x != np.array([])) and (t != np.array([])):
+            plt.plot(x,t,color=color,linewidth=1)
+
+        plt.ylim(bottom=-1.5,top= 1.5) 
+        plt.xlim(left =0,right=1)
+        plt.xlabel('X', fontsize=10)
+        plt.ylabel('t',labelpad=10, fontsize=10, rotation=0)
+        plt.title(title)
+    def k_g(xn,xm):
+        t0 ,t1,t2,t3 =1,4,0,3
+        return t0*np.exp((-t1/2)*np.linalg.norm((xn,xm), axis=0 )**2) + t2 + t3*xn.T@xm
+    def get_k(x)
+    
+    def get_c(x, beta):
+        C = np.zeros((x.shape[0],x.shape[0]))
+        for n,xn in enumerate(x):
+            for m,xm in enumerate(x):
+                C[n,m]=k_g(xn,xn)+(beta**-1)*np.eye(xn.shape[0])
+        return C 
+        
+
+    def gen_M_S( x, t, alpha, beta):
+        # iota = np.column_stack( [scipy.stats.norm(i*.1+.1,.2).pdf(x) for i in range(9)] )
+        # sn = np.linalg.inv(alpha*np.eye(iota.shape[1]) + beta*iota.T@iota)
+        # mn = (beta* (sn@iota.T)@t)
+        k = k_g(xn,xm)
+         
+        c = k(,)+beta**-1
+        C = np.array([[Cn,k],[k,c]])
+        m = k.T @ np.inv(C) @ t
+        sig_squared = c-k.T@np.inv(C)@k
+
+        return mn, sn    
+            
+    
+    
+    plt.rcParams['figure.figsize'] = (16,9) 
+
+    sigma = .2 
+    alpha = 2
+    beta = (1/sigma)**2
+    
+    loc = 1
+    name = ['N=1','N=2','N=4','N=25']
+    for N in [1,2,4,25]: 
+        # choose quadrant to plot in 
+        plt.subplot(2,2,loc) 
+        
+        # generate true data
+        x_ = np.linspace(0,1,num=100)
+        t_ = np.sin(2*np.pi*x_)
+         
+        # how many randon ints specifies num data points trained on
+        r = np.random.randint(0, 99, (N) )
+        
+        mn,sn = gen_M_S(x_[r], t_[r], alpha, beta)
+
+        phi = np.column_stack([scipy.stats.norm(i*.1+.1,.2).pdf(x_) for i in range(9)]).T
+        g_mean = mn.T@phi
+
+        plt.plot(x_, g_mean,linewidth=1) # plot pred
+        plt.plot(x_[r], t_[r],'o', markersize=3) #plot data points 
+        var =np.diag( 1/beta + phi.T@sn@phi)
+        plt.fill_between(x_,g_mean+var,g_mean-var,color = 'pink') #plot variance
+        format(plt,x_,t_,title = name[loc-1]) # plots true sin wave
+        loc+=1
+        
+    plt.tight_layout()
+    plt.savefig('project_2_graphs/3_8.pdf')
 
 if __name__ == '__main__':
     data = scipy.io.loadmat("mlData.mat")

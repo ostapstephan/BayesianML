@@ -283,6 +283,7 @@ def make38():
     
     loc = 1
     name = ['N=1','N=2','N=4','N=25']
+
     for N in [1,2,4,25]: 
         plt.subplot(2,2,loc) 
         x_ = np.linspace(0,1,num=100)
