@@ -5,7 +5,7 @@
 
 import matplotlib.pyplot as plt 
 import numpy as np
-from scipy.stats import multivariate_normal
+from scipy.stats import multivariate_normal as mv_norm
 from sklearn import metrics
 from sklearn.model_selection import train_test_split
 
@@ -29,21 +29,29 @@ class EM:
     def __init__(self, seed, N ):
         np.random.seed(seed)
         self.N = N
-        
-        
-                
-    def e(self,mu,sigma,pie,):       
-        # gamma_z = pie*
-        pass
-        
 
-    def m(self):
-        mu = []
+    def e(self,mu,sigma,pie):       
+        gamma = np.zeros(mu.shape[0])  
+        d=[]
+        for k in range(mu.shape[0]):
+            d.append(pie[k]*mv_norm(x,mu[k],sig[k])))
+        denominator=sum(d)
+        for k in range(mu.shape[0]):
+            gamma[k]= pie[k]*mv_norm(x,mu[k],sig[k])/denominator
+
+        # gamma's shape == [n,k]
+        return gamma
+
+
+    def m(self,):
+        #TODO figure this one out
+        mu = 1/N
         sig = []
         pie = []
         # pass
     
     def gen_data(self, meanRange=(-10,10), ndims=1):
+        ndims = int(ndims)
         if ndims == 1:
             # 1d case 
             mu0 = np.random.uniform(meanRange[0],meanRange[1],(1))
@@ -73,6 +81,7 @@ class EM:
             pie = np.array([n0,n1,n2])
 
         elif ndims > 1:
+            print("n>1")
             # ndims > 1 case 
             mu0 = np.random.uniform(meanRange[0],meanRange[1],(ndims))
             mu1 = np.random.uniform(meanRange[0],meanRange[1],(ndims))
@@ -86,29 +95,31 @@ class EM:
             n1 = np.random.randint(self.N/6,self.N/2)
             n2 = self.N - n0 - n1
             
-            print('Pie',n0,n1,n2)  
-            print('mu',mu0,mu1,mu2)  
-            print('sig',sig0,sig1,sig2)  
+            print('Pie', n0,n1,n2)  
+            print('mu',  mu0,mu1,mu2)  
+            print('sig', sig0,sig1,sig2)  
 
             data_0 = np.random.multivariate_normal(mu0,sig0,(n0))
             data_1 = np.random.multivariate_normal(mu1,sig1,(n1))
             data_2 = np.random.multivariate_normal(mu2,sig2,(n2))
 
+            '''
+            # for data in [data_0,data_1,data_2]:
+                # x = data[:,0]
+                # y = data[:,1]
+                # plt.scatter(x,y)
+            # plt.show()
+            '''
             x   = np.concatenate([data_0,data_1,data_2])
-            mu  = np.concatenate([mu0,mu1,mu2])
-            sig = np.concatenate([sig0,sig1,sig2])
-            pie = np.concatenate([n0,n1,n2])
-
+            mu  = np.array([mu0,mu1,mu2])
+            sig = np.array([sig0,sig1,sig2])
+            pie = np.array([n0,n1,n2])
+            
         else:
             raise ValueError(f'Number of dimentions must be greater than or equal to 1, you passed: {ndims}')
 
         return x, mu, sig, pie
-    
-
-
-
-
-    
+   
 if __name__ == '__main__':
     seed = 7
     N = 30000# num data points per cat
@@ -121,15 +132,32 @@ if __name__ == '__main__':
 
     # draw true curve
     x = np.linspace(-10,10,1000)
-    y = (bounds[1]-bounds[0])/bins* (pie[0]*multivariate_normal.pdf(x, mu[0], sig[0] ) + pie[1]*multivariate_normal.pdf(x, mu[1], sig[1] ) + pie[2]*multivariate_normal.pdf(x, mu[2], sig[2] ))
+    y = (bounds[1]-bounds[0])/bins* (pie[0]*multivariate_normal.pdf(x, mu[0], sig[0] ) + pie[1]*multivariate_normal.pdf(x, mu[1], sig[1] ) + pie[2]*multivariate_normal.pdf(x,mu[2],sig[2]))
 
     plt.plot(x,y)
-
+    
     plt.show()
+    plt.clf()
+    
+    
+    ########################################
+    ########## 2D 3 Cluster Case ###########
+    ########################################
+    seed = 7
+    N = 3000
+    
+    em_alg= EM(seed, N)
+    data, mu, sig, pie =  em_alg.gen_data((-10,10), ndims=2)
+    
+    # bins = 40
+    # bounds = (-10,10)
+    
+    # draw true curve
+    # x = np.linspace(-10,10,1000)
+    # y = (bounds[1]-bounds[0])/bins* (pie[0]*multivariate_normal.pdf(x, mu[0], sig[0] ) + pie[1]*multivariate_normal.pdf(x, mu[1], sig[1] ) + pie[2]*multivariate_normal.pdf(x, mu[2], sig[2] ))
 
+    # plt.plot(x,y)
 
-
-
-
+    # plt.show()
 
 

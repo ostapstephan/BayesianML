@@ -14,8 +14,8 @@ import pandas as pd
 
 '''
 Implement two different linear classifiers:
-a Gaussian generative model
-a logistic regression classifier. 
+    a Gaussian generative model
+    a logistic regression classifier. 
     you must implement the IRLS algorithm. 
     You will need to use a 3rd basis function to separate the circles data, 
     but you can operate directly in the feature space for the unimodal data.
@@ -122,7 +122,7 @@ def trainAndInferIRLS(x_train, t_train, x_test, circles=True, n_iter=2):
     t_hat[y_pred > .5] = 1
     return t_hat, w 
     
-def plotROC(x_test, t_hat, title= ''):
+def plotROC(t_test, t_hat, title= ''):
     fpr, tpr, thresholds = metrics.roc_curve(t_test,t_hat)
     roc_auc = metrics.auc(fpr, tpr)
 
