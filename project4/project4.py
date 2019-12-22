@@ -165,6 +165,7 @@ def GaussianProc():
     plt.savefig('plots/kernel_regression.png')
 
     plt.clf()
+
 def svm_process():
     '''
     Transform data to the format of an SVM package
